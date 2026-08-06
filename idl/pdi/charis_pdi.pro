@@ -232,7 +232,7 @@ pro charis_pdi, pfname, $
     Um = right_cycle[*, *, *, 3] - left_cycle[*, *, *, 3]
 
     ; Double diffs
-    PQ = 0.5 * (Qp - Qm)
+    PQ = 0.5 * (Qp - Qm) 
     PU = 0.5 * (Up - Um)
 
     if keyword_set(no_mm_ip_corr) and keyword_set(no_mm_crosstalk_corr) then goto, skip_mm_calcs

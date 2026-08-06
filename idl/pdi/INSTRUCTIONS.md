@@ -22,7 +22,7 @@ charis_imprep
 ```
 Open ab_aur_low.info, and correct:
 1. fnum_sat and fnum_sky (the DPP often mistakes PDI images as sky frames. You should visually inspect your images to make sure these are correct.
-2. sptype (to whatever spectral type you'd like to assume for specphotcal
+2. sptype (to whatever spectral type you'd like to assume for specphotc/≥al
 3. For pdi flat-fielding, `brightflatdir` should point to a directory containing extracted PDI flat images taken with your data. 
 4. Optionally, if PDI dark flats were collected, you can point to them with the `darkflatdir` keyword.
 
@@ -37,12 +37,12 @@ charis_pdi_subtract_sky, 'ab_aur_low.info', /scalesky
 
 ## Image registration
 ```
-charis_pdi_register_cube, 'ab_aur_low.info', astrogrid=11.2
+A, 'ab_aur_low.info', astrogrid=11.2
 ```
 
 ## Spectrophotometric calibration
 ```
-charis_pdi_specphot_cal, 'ab_aur_low.info', modamp=25, ap_factor=3, starlib=1
+charis_pdi_specphot_cal, 'ab_aur_low.info', modamp=25, ap_factor=3, starlib=1, av=av # where we basically account for reddening (read this in the related paper(s) of the target)
 ```
 
 ## PDI

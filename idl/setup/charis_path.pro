@@ -11,7 +11,7 @@ function charis_path, pathname = pathname
   ; *****MODIFY THESE****
 
   ; 1.
-  charispath = '/Users/mileslucas/software/charis-dpp/idl/'
+  charispath = '/home/thomasmc/charis-dpp/idl/'
 
   ; these models have are from the online substellar atmosphere model server:
   ; http://svo2.cab.inta-csic.es/theory/newov2/

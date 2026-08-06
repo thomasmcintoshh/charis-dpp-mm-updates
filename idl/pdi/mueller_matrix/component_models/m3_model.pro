@@ -16,9 +16,9 @@ function m3_model, lambda, epsilon_m3 = epsilon_m3
   lambda_meters = lambda * 1e-09
 
   m1 = 2.104d
-  b1 = 14.20d
-  m2 = 2.100d
-  b2 = 13.20d
+  b1 = 14.2d
+  m2 = 2.1d 
+  b2 = 13.2d
 
   eps_r1 = -(10.d ^ b1) * (lambda_meters ^ m1)
   eps_r2 = (10.d ^ b2) * (lambda_meters ^ m2)

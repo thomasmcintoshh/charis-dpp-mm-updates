@@ -30,6 +30,20 @@ pro charis_snratio, cube, coord = coord, expfilt = expfilt, rmax = rmax, exc = e
 
   ; now, take cube name to do
   cubename = cube
+  
+  ; Build output filenames from the input cube name
+  cube_dir  = file_dirname(cubename)            ; e.g. /path/to
+  cube_base = file_basename(cubename)           ; e.g. rdiklip01.fits
+
+  ; Strip the extension (more robust than strsplit if filename has extra dots)
+  dotpos = strpos(cube_base, '.', /reverse_search)
+  if dotpos ge 0 then cube_root = strmid(cube_base, 0, dotpos) else cube_root = cube_base
+
+  snrmap_col_out  = cube_dir + '/' + cube_root + '_snrmap_col.fits'
+  snrmap_cube_out = cube_dir + '/' + cube_root + '_snrmap_cube.fits'
+
+  print, 'Collapsed SNR map will be saved to: ', snrmap_col_out
+  print, 'Cube SNR map will be saved to: ', snrmap_cube_out
 
   if ~keyword_set(colimage) then begin
     collapsedname = (strsplit(cubename, '.', /extract))[0] + '_collapsed.fits'
@@ -94,7 +108,7 @@ pro charis_snratio, cube, coord = coord, expfilt = expfilt, rmax = rmax, exc = e
     print, 'SNR in Collapsed Image is ', snrvalcol
   endif
 
-  writefits, 'snrmap_col.fits', snrmap_collapsed, h1
+  writefits, snrmap_col_out, snrmap_collapsed, h1
   ; Now do SNR for cube
   for i = 0l, n_elements(wvlh_charis) - 1 do begin
     imslice = imcube[*, *, i]
@@ -114,5 +128,5 @@ pro charis_snratio, cube, coord = coord, expfilt = expfilt, rmax = rmax, exc = e
 
   ; now, write the output
 
-  writefits, 'snrmap_cube.fits', snrmap_cube, h1
+  writefits, snrmap_cube_out, snrmap_cube, h1
 end
