@@ -105,8 +105,8 @@ pro charis_pdi, pfname, $
   delta_der = derotator_model(lambda, epsilon_der = epsilon_der)
   delta_tel = m3_model(lambda, epsilon_m3 = epsilon_tel)
   epsilon_bs = 1.d
-  dtheta_hwp = -0.002d
-  dtheta_der = -0.0118d
+  dtheta_hwp = -0.04d ; updated McIntosh+ 2026 value
+  dtheta_der = -0.02d ; updated McIntosh+ 2026 value
   ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
   ; Remove old per-cycle products of same 'outfile' prefix. This avoids possible confusion; e.g., if you're using /collapse_cycles

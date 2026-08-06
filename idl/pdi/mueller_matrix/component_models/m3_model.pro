@@ -14,11 +14,11 @@ function m3_model, lambda, epsilon_m3 = epsilon_m3
   ;
 
   lambda_meters = lambda * 1e-09
-
-  m1 = 2.104d
-  b1 = 14.2d
-  m2 = 2.1d 
-  b2 = 13.2d
+  ; all vals updated via new unpol standard fit post 2026 m3 silver recoat
+  m1 = 1.768d
+  b1 = 12.77d
+  m2 = 2.455d 
+  b2 = 15.67d
 
   eps_r1 = -(10.d ^ b1) * (lambda_meters ^ m1)
   eps_r2 = (10.d ^ b2) * (lambda_meters ^ m2)
