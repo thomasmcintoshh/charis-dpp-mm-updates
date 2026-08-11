@@ -1,6 +1,6 @@
 # CHARIS PDI Instructions
 
-*Originally written by Kellen Lawson (2022). Updated by Miles Lucas (2023).*
+*Originally written by Kellen Lawson (2022). Updated by Miles Lucas (2023).* Updated again by Thomas McIntosh (2026)
 
 Assumes you're in a directory containing 
 1. a sequence of extracted CHARIS PDI cubes (including sky frames)

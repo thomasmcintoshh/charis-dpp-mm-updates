@@ -40,7 +40,7 @@ function get_charis_mueller_matrix, $
   M = make_array(nL, 4, /double)
   for Li = 0, nL - 1 do begin
     Mi = charis_pdi_mueller_matrix( $
-      epsilon_bs, $
+      epsilon_bs[Li], $
       epsilon_der, delta_h_der[Li], delta_45_der[Li], delta_r_der[Li], $
       epsilon_hwp, delta_hwp[Li], $
       epsilon_tel[Li], delta_tel[Li], $
