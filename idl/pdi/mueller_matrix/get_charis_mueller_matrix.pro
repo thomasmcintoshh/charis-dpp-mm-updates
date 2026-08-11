@@ -1,6 +1,6 @@
 function get_charis_mueller_matrix, $
   h1, hwpang, epsilon_bs, $
-  epsilon_der, delta_der, $
+  epsilon_der, delta_h_der, delta_45_der, delta_r_der,$
   epsilon_hwp, delta_hwp, $
   epsilon_tel, delta_tel, $
   dtheta_der, dtheta_hwp, $
@@ -39,7 +39,9 @@ function get_charis_mueller_matrix, $
 
   M = make_array(nL, 4, /double)
   for Li = 0, nL - 1 do begin
-    Mi = charis_pdi_mueller_matrix(epsilon_bs, epsilon_der[Li], delta_der[Li], $
+    Mi = charis_pdi_mueller_matrix( $
+      epsilon_bs, $
+      epsilon_der, delta_h_der[Li], delta_45_der[Li], delta_r_der[Li], $
       epsilon_hwp, delta_hwp[Li], $
       epsilon_tel[Li], delta_tel[Li], $
       theta_der_adj, theta_hwp_adj, $

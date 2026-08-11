@@ -102,7 +102,7 @@ pro charis_pdi, pfname, $
   ; ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   ; Get constant (per wavelength) values for Mueller matrix
   delta_hwp = hwp_model(lambda, epsilon_hwp = epsilon_hwp)
-  delta_der = derotator_model(lambda, epsilon_der = epsilon_der)
+  delta_h_der = derotator_model(lambda, delta_45_der=delta_45_der, delta_r_der=delta_r_der, epsilon_der = epsilon_der)
   delta_tel = m3_model(lambda, epsilon_m3 = epsilon_tel)
   epsilon_bs = 1.d
   dtheta_hwp = -0.04d ; updated McIntosh+ 2026 value
@@ -233,13 +233,13 @@ pro charis_pdi, pfname, $
 
     ; Double diffs
     PQ = 0.5 * (Qp - Qm) 
-    PU = 0.5 * (Up - Um)
+    PU = 0.5 * (Up - Um) 
 
     if keyword_set(no_mm_ip_corr) and keyword_set(no_mm_crosstalk_corr) then goto, skip_mm_calcs
-    xqp = get_charis_mueller_matrix(h1_qpL, (hwp_ang[Qp_ind]), epsilon_bs, epsilon_der, delta_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
-    xup = get_charis_mueller_matrix(h1_upL, (hwp_ang[Up_ind]), epsilon_bs, epsilon_der, delta_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
-    xqm = get_charis_mueller_matrix(h1_qmL, (hwp_ang[Qm_ind]), epsilon_bs, epsilon_der, delta_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
-    xum = get_charis_mueller_matrix(h1_umL, (hwp_ang[Um_ind]), epsilon_bs, epsilon_der, delta_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
+    xqp = get_charis_mueller_matrix(h1_qpL, (hwp_ang[Qp_ind]), epsilon_bs, epsilon_der, delta_h_der, delta_45_der, delta_r_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
+    xup = get_charis_mueller_matrix(h1_upL, (hwp_ang[Up_ind]), epsilon_bs, epsilon_der, delta_h_der, delta_45_der, delta_r_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
+    xqm = get_charis_mueller_matrix(h1_qmL, (hwp_ang[Qm_ind]), epsilon_bs, epsilon_der, delta_h_der, delta_45_der, delta_r_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
+    xum = get_charis_mueller_matrix(h1_umL, (hwp_ang[Um_ind]), epsilon_bs, epsilon_der, delta_h_der, delta_45_der, delta_r_der, epsilon_hwp, delta_hwp, epsilon_tel, delta_tel, dtheta_der, dtheta_hwp, no_adisync = no_adisync)
 
     q_mr = 0.5 * (xqp - xqm) ; Q double-diff Mueller row-vector, etc.
     q_ixs[*, ci] = q_mr[*, 0]
