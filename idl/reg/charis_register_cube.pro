@@ -1,3 +1,4 @@
+;works but you need to clean up your source code
 pro charis_register_cube,pfname,prefname=prefname,suffname=suffname,$
 method=method,$
 guessoffsets=guessoffsets,$
@@ -17,6 +18,7 @@ nosmooth=nosmooth,$
 fwhmlim=fwhmlim,$
 smallsteps=smallsteps,$
 ;refslice=refslice,$
+smoothval=smoothval,$
 smask=smask,$
 checkquality=checkquality,$
 astrogrid=astrogrid,$
@@ -107,6 +109,8 @@ print,"*astrogrid [Alternate astrogrid spacing in lambda / D units]; to use for 
 goto,skiptotheend
 endif
 
+if ~keyword_set(smoothval) then smoothval=3
+
 if ~keyword_set(method) then begin 
 method = 0
 
@@ -117,20 +121,24 @@ endif
 ;if method eq 'psf' then method = 1
 ;if method eq 'calsats' then method =2
 
-if method eq 'sats' then begin 
+
+if string(method) eq 'sats' then begin 
 method = 0
 goto,skipmethodlist
 endif
-if method eq 'psf' then begin
+if string(method) eq 'psf' then begin
 method = 1
 goto,skipmethodlist
 endif
-if method eq 'calsats' then begin
+if string(method) eq 'calsats' then begin
 method =2
 goto,skipmethodlist
 endif
 
+
 skipmethodlist:
+
+
 
 refslice=10 ;hardwire this for now
 
@@ -433,7 +441,6 @@ endif
  cens0p=cv_coord(from_rect=cens0-c0,/to_polar)
 initial_centroid=median(cens0,dimension=2,/even)
 
-;dist_circle,g,[sz[1],sz[2]]
 
 PSFcens=fltarr(2,sz[3])
 deltax=fltarr(sz[3])
@@ -449,7 +456,7 @@ if keyword_set(rsub) then begin
 profrad_tc,a_test,2,1,dim/2,p2d=pr
 a_test-=pr
 endif
-if ~keyword_set(nosmooth) then a_test=smooth(a_test,3)
+if ~keyword_set(nosmooth) then a_test=smooth(a_test,smoothval)
 
 ;****if you have a very bright pt source that is skewing the sat spot determination, apply an NAN mask here.
 if keyword_set(smask) then begin
@@ -600,13 +607,15 @@ refoffsety=PSFcens[1,refslice]-yc0
 deltax=fitx[0]+fitx[1]*(slices-refslice)+fitx[2]*(slices-refslice)^2.+refoffsetx
 deltay=fity[0]+fity[1]*(slices-refslice)+fity[2]*(slices-refslice)^2.+refoffsety
 
-print,refoffsetx,xc0,PSFcens[0,refslice]
+if keyword_set(verbose) then print,refoffsetx,xc0,PSFcens[0,refslice]
 
 if keyword_set(guessoffsets) then begin
 plot,slices,PSFcens[0,*],yrange=[40,140],ystyle=1,/nodata
+
 ;plot,slices,PSFcens[0,*],yrange=[median(PSFcens[0,*])-7,median(PSFcens[0,*])+7],ystyle=1,/nodata
 ;sz[1]/2-7+long(guessoffsets[0]),sz[1]/2+7+long(guessoffsets[1])],ystyle=1,/nodata
 ;plot,slices,PSFcens[0,*],yrange=[sz[1]/2-7+long(guessoffsets[0]),sz[1]/2+7+long(guessoffsets[1])],ystyle=1,/nodata
+
 endif else begin
 plot,slices,PSFcens[0,*],yrange=[sz[1]/2-7,sz[1]/2+7],ystyle=1,/nodata
 endelse
@@ -774,13 +783,12 @@ if keyword_set(splitpsf) then begin
 
 ;az=sumaper_im(smooth(a[*,*,il],3),fwhmlim,30,/nan)
 az=sumaper_im(smooth(a[*,*,il],3),fwhmlim/2,80,/nan,/silent)
-;;cntrd,az,xc0+guessoffsets[0],yc0+guessoffsets[1],xc1,yc1,fwhm[il],extendbox=3
 cntrd,az,xc0+guessoffsets[0],yc0+guessoffsets[1],xc1,yc1,4*fwhmlim
 
 ;sourceind=get_xycind(dim,dim,xc0+guessoffsets[0],yc0+guessoffsets[1],fwhmlim)
 ;xinds = sourceind mod dim
 ;yinds = sourceind / dim
-print,'initial guess before splitting',xc0+guessoffsets[0],yc0+guessoffsets[1]
+if keyword_set(verbose) then print,'initial guess before splitting',xc0+guessoffsets[0],yc0+guessoffsets[1]
 
 ;simple center of mass.  tests do not find this to be better than cntrd off of sumaper_im'd images
 ;fimage=a[*,*,il]
@@ -837,8 +845,7 @@ oplot,slices,PSFcens[1,*]+3,psym=4,thick=5
 oplot,slices,deltay+yc0+3,linestyle=1
 
 
-;wait,2.5
-;if keyword_set(wait) then wait,2
+if keyword_set(wait) then wait,2
 endif else begin
 deltax[*]=-9999
 deltay[*]=-9999
@@ -872,8 +879,6 @@ sxaddpar,h0,'HISTORY',currenttime_log+' '+dpp_command
 writefits,reducdir+filesout[i],0,h0
 writefits,reducdir+filesout[i],a,h1,/append
 if ~keyword_set(ladder) then printf,1,filenum[i],psfcenx,psfceny,rsat,ha0,parangle0
-
-;if keyword_set(wait) then wait,2
 
 endfor
 
@@ -967,6 +972,7 @@ if ~keyword_set(rout_corr) then rout_corr=0.5
 
 ref_firstchan=refimage[*,*,refslice]
 ref_firstchan-=filter_image(ref_firstchan,median=medbox)
+
 if keyword_set(rsub) then begin
 profrad_tc,ref_firstchan,2,1,dim/2,p2d=pr
 ref_firstchan-=pr
@@ -1019,9 +1025,11 @@ endfor
 ;****Polynomial fit to individual slice centroid measurements****
 slices=findgen(sz[3])
 ;-refslice
+
 good=where(finite(PSFcensref[0,ceil(fittrim/2.):sz[3]-1-floor(fittrim/2.)]) ne 0 and finite(PSFcensref[1,ceil(fittrim/2.):sz[3]-1-floor(fittrim/2.)]) ne 0,ngood)
 ;good=where(finite(PSFcensref[0,2:sz[3]-1-2]) ne 0 and finite(PSFcensref[1,2:sz[3]-1-2]) ne 0,ngood)
-print,'good is', ngood
+
+if keyword_set(verbose) then print,'good is', ngood
 
 if ngood eq 0 then stop
 
@@ -1036,7 +1044,7 @@ refoffsety=PSFcensref[1,refslice]-yc0
 deltaxref=fitx[0]+fitx[1]*(slices-refslice)+fitx[2]*(slices-refslice)^2.+refoffsetx
 deltayref=fity[0]+fity[1]*(slices-refslice)+fity[2]*(slices-refslice)^2.+refoffsety
 
-print,'Offsets of Reference Image ',deltaxref,deltayref
+if keyword_set(verbose) then print,'Offsets of Reference Image ',deltaxref,deltayref
 
 if keyword_set(guessoffsets) then begin
 plot,slices,PSFcensref[0,*],yrange=[sz[1]/2-7+long(guessoffsets[0]),sz[1]/2+7+long(guessoffsets[1])],ystyle=1,/nodata
@@ -1180,6 +1188,7 @@ endfor
 
 endcase
 
+;***move this to a separate function entirely
 ;****Check PSF quality ****
 if (keyword_set(checkquality) and method eq 0) then begin
 ;if (keyword_set(checkquality)) then begin
@@ -1196,7 +1205,7 @@ openw,2,'PSFquality'
 sattohalo=fltarr(nfiles)
 for ifile=0L,nfiles-1 do begin
 
-inputcube=readfits(reducdir+filesout[ifile],/ext,h1input)
+inputcube=readfits(reducdir+filesout[ifile],/ext,h1input,/silent)
 
 cens=fltarr(2,4,sz[3])
 

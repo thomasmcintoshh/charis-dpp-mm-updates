@@ -143,8 +143,8 @@ print,'nfiles is',nfiles
 
 ;test the first image, see if it has the fits header info you need.
 
-bbtest=readfits(files[0],h1test,ext=1)
-htest=headfits(files[0])
+bbtest=readfits(files[0],h1test,ext=1,/silent)
+htest=headfits(files[0],/silent)
 
 ;if you want to manually set the exposure time and coadds then input them here...
 if keyword_set(charismanual) then begin
@@ -158,12 +158,11 @@ endif
 obslogname='obslog.txt'
 openw,1,obslogname
 
-;printf,1,'File_in','File_out','ExpTime','ParAngle','Health_Flag'
 printf,1,'File_in','','File_out','','ExpTime','','ParAngle','','Health_Flag'
 
 for i=0L,nfiles-1 do begin
-bb=readfits(files[i],h1,/exten)
-h0=headfits(files[i],ext=0)
+bb=readfits(files[i],h1,/exten,/silent)
+h0=headfits(files[i],ext=0,/silent)
 
 sz=size(bb)
 
@@ -189,7 +188,7 @@ sz=size(bb)
   if lst2count gt 0 then lst=lst2
 
  ;Hour Angle, probably is not entered in here.
-  ha=sxpar(h0,'HA',count=hacount)
+  ha=sxpar(h0,'HA',count=hacount,/silent)
 
   if hacount gt 0 then begin
   ha=ten(ha)
@@ -198,12 +197,12 @@ sz=size(bb)
   endif
 
  ;;get the date, then calculate the epoch 
-  dateobs=sxpar(h0,'UTC-DATE')
-  utcdate=ten(sxpar(h0,'UTC-TIME'))
+  dateobs=sxpar(h0,'UTC-DATE',/silent)
+  utcdate=ten(sxpar(h0,'UTC-TIME',/silent))
   hms0=sixty(utcdate)
 
 
-  ymd0 = double(strsplit(dateobs,/extract,'-'))
+  ymd0 = double(strsplit(dateobs,'-',/extract))
   jd0=double(julday(ymd0[1], ymd0[2], ymd0[0],hms0[0],hms0[1],hms0[2]))
 
   epoch0 = (jd0 - 2451545d0)/365.25d0 + 2000d0
@@ -299,7 +298,7 @@ endif
 
 ;****post-NBS parity flip and north PA correction
 
-mjd_date=sxpar(h0,'MJD',count=mjdcount)
+mjd_date=sxpar(h0,'MJD',count=mjdcount,/silent)
 
 if mjdcount eq 0 then begin
 print,'ERROR, missing MJD date: check your cubes'
@@ -308,7 +307,7 @@ endif
 
 if mjd_date gt 60933 then begin
 
-print,'POST-NBS Parity Flip and NorthPA correction'
+;print,'POST-NBS Parity Flip and NorthPA correction'
 result=charis_nbs_corr(bb,h0,h1)
 
 bb=result.cube
@@ -324,6 +323,7 @@ endif
 fileoutname=prefname+nbr2txt(i+1,4)+'e.fits'
 
 reducdir='./reduc/prep/'
+
 ;if for some reason you want to g-zip the data cubes
 if keyword_set(gz) then begin
 writefits,reducdir+fileoutname+'.gz',0,h0,/compress
@@ -346,5 +346,7 @@ charis_set_files,pfname,'FNUM_SKY','sky',obslogname
 
 close,11
 breakout:
+
+print,'Finished Prepping Cubes'
 
 end

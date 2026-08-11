@@ -2,6 +2,7 @@ function charis_nbs_corr,cube,h0,h1,rotzp=rotzp
 
 ;*****
 ;a simple function to correct the parity of post NBS CHARIS cubes and recalculate the WCS solution
+;valid for CHARIS data taken after ~Sept 2025 (MJD 60933.0)
 ;we will assume north up, east-left
 
 ;also requires a fix to charis_register_cube to get guess positions of sat spots correct
@@ -17,7 +18,7 @@ extrarot=113-rotzp
 ;correct the rotation offset
 
 ;left handed: impose this
-totrot=-1*(sxpar(h1,'PARANG')+extrarot)
+totrot=-1*(sxpar(h1,'PARANG',/silent)+extrarot)
 
 ;right handed
 ;totrot=1*(sxpar(h1,'PARANG')+extrarot)
@@ -26,16 +27,17 @@ totrot=-1*(sxpar(h1,'PARANG')+extrarot)
 
 
 ;left handed
-xp=sxpar(h1,'XPIXSCAL')
+xp=sxpar(h1,'XPIXSCAL',/silent)
 
 ;this is what you do if you want a right handed coordinate system
 ;xp=-1*sxpar(h1,'XPIXSCAL')
 ;sxaddpar,h1,'XPIXSCAL',xp
 
-yp=sxpar(h1,'YPIXSCAL')
+yp=sxpar(h1,'YPIXSCAL',/silent)
 
 ;****Delete Erroneous FITS header information****
 ;this will eliminate the WCS entirely
+
 ;goto,skipnowcs
 sxdelpar,h1,'CD1_1'
 sxdelpar,h1,'CD1_2'
@@ -99,8 +101,6 @@ cube_corrected = reverse(cube,1)
 ;****Return Results
 ; Return as an IDL structure (like a Python dict)
 results = {cube: cube_corrected, h0: h0, h1: h1}
-
-;if (sxpar(h0,'MJD') gt 60933.0) then print,'yes, you needed to do this'
 
 return, results
 
