@@ -753,6 +753,11 @@ pi_cube = sqrt(qcube^2 + ucube^2)
 writefits,procdir+outfile+'_pi.fits',0,h0_main
 writefits,procdir+outfile+'_pi.fits',pi_cube,h1_main,/append
 
+; AOLP cube (per-wavelength), matching Q/U/PI cube convention
+aolp_cube = (0.5*atan(ucube, qcube))*!RADEG
+writefits,procdir+outfile+'_aolp.fits',0,h0_main
+writefits,procdir+outfile+'_aolp.fits',aolp_cube,h1_main,/append
+
 ; Collapse Q and U wavelength cubes to a single broadband image
 case collapse_type of
     'median': begin & qcol=median(qcube, dimension=3, /even) & ucol=median(ucube, dimension=3, /even) & end
@@ -769,9 +774,9 @@ pi_col = sqrt(qcol^2 + ucol^2)
 writefits,procdir+outfile+'_pi_collapsed.fits',0,h0_main
 writefits,procdir+outfile+'_pi_collapsed.fits',pi_col,h1_main,/append
 
-aolp = (0.5*atan(ucol, qcol))*!RADEG
-writefits,procdir+outfile+'_aolp.fits',0,h0_main
-writefits,procdir+outfile+'_aolp.fits',aolp,h1_main,/append
+aolp_col = (0.5*atan(ucol, qcol))*!RADEG
+writefits,procdir+outfile+'_aolp_collapsed.fits',0,h0_main
+writefits,procdir+outfile+'_aolp_collapsed.fits',aolp_col,h1_main,/append
 
 coverage_cube = product(finite((qhcube + uhcube)), 3)
 if n_elements(size(coverage_cube, /dim)) lt 3 then coverage_map = coverage_cube else coverage_map = total(coverage_cube, 3) / double(ncycles)
